@@ -110,7 +110,7 @@ const ShiftHandover = () => {
                 <div>
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
                         <ArrowRightLeft className="text-maroon h-8 w-8" />
-                        {t('Receptionist Handover')}
+                        {t('Shift Handover')}
                     </h1>
                     <p className="text-slate-500 mt-1">{t('Manage your daily shifts and earnings records')}</p>
                 </div>
@@ -246,7 +246,7 @@ const ShiftHandover = () => {
                         <thead>
                             <tr className="bg-slate-50 text-left">
                                 <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">{t('Date')}</th>
-                                <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">{t('Receptionist')}</th>
+                                <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">{t('Staff Member')}</th>
                                 <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">{t('Shift')}</th>
                                 <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono text-center">{t('Clients')}</th>
                                 <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">{t('Clock In/Out')}</th>

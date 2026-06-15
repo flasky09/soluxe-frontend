@@ -55,7 +55,6 @@ const menuGroups = [
             { label: 'Housekeeping', path: '/housekeeping', icon: Sparkles, allowedRoles: ['ROLE_HOTEL_ADMIN', 'ROLE_MANAGER', 'ROLE_HOUSEKEEPING', 'ROLE_RECEPTIONIST'] },
             { label: 'Venues', path: '/venues', icon: Building2, allowedRoles: ['ROLE_HOTEL_ADMIN', 'ROLE_MANAGER', 'ROLE_RECEPTIONIST'] },
             { label: 'Venue Bookings', path: '/venue-bookings', icon: CalendarDays, allowedRoles: ['ROLE_HOTEL_ADMIN', 'ROLE_MANAGER', 'ROLE_RECEPTIONIST'] },
-            { label: 'Shift Handover', path: '/shift-handover', icon: ArrowRightLeft, allowedRoles: ['ROLE_HOTEL_ADMIN', 'ROLE_MANAGER', 'ROLE_RECEPTIONIST'] },
         ]
     },
     {
@@ -182,6 +181,18 @@ const Sidebar = ({ isOpen, onClose }) => {
                 >
                     <LayoutDashboard size={18} />
                     <span>{t(dashboardItem.label)}</span>
+                </NavLink>
+
+                {/* Standalone Shift Handover Link */}
+                <NavLink 
+                    to="/shift-handover" 
+                    onClick={() => window.innerWidth < 1024 && onClose()}
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 px-6 py-4 no-underline text-white font-bold text-sm transition-all duration-300 border-l-4 border-transparent hover:text-yellow hover:bg-yellow/5 ${isActive ? 'text-yellow bg-yellow/10 border-l-yellow' : 'opacity-80 hover:opacity-100'}`
+                    }
+                >
+                    <ArrowRightLeft size={18} />
+                    <span>{t('Shift Handover')}</span>
                 </NavLink>
 
                 <div className="h-px bg-white/10 mx-6 my-2" />

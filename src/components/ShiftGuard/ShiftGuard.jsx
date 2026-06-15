@@ -13,16 +13,16 @@ const ShiftGuard = ({ children }) => {
     const [hasActiveShift, setHasActiveShift] = useState(true); // Default to true to prevent flickering
     const [loading, setLoading] = useState(true);
 
-    const isReceptionist = user?.roles?.some(r => r === 'ROLE_RECEPTIONIST' || r === 'RECEPTIONIST');
+    const requiresShift = user?.roles?.every(r => !r.toUpperCase().includes('ADMIN')) && user != null;
     const isHandoverPage = location.pathname === '/shift-handover';
 
     useEffect(() => {
-        if (isReceptionist && !isHandoverPage) {
+        if (requiresShift && !isHandoverPage) {
             checkShift();
         } else {
             setLoading(false);
         }
-    }, [location.pathname, isReceptionist, isHandoverPage]);
+    }, [location.pathname, requiresShift, isHandoverPage]);
 
     const checkShift = async () => {
         try {
@@ -38,7 +38,7 @@ const ShiftGuard = ({ children }) => {
 
     if (loading) return null;
 
-    if (isReceptionist && !hasActiveShift && !isHandoverPage) {
+    if (requiresShift && !hasActiveShift && !isHandoverPage) {
         return (
             <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-6 text-center">
                 <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-300">

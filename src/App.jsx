@@ -43,6 +43,7 @@ function App() {
               {/* Main */}
               <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/shift-handover" element={<ShiftHandover />} />
               </Route>
 
               {/* Operations */}
@@ -56,7 +57,6 @@ function App() {
                   <Route path="/keycards" element={<Keycards />} />
                   <Route path="/venues" element={<Venues />} />
                   <Route path="/venue-bookings" element={<VenueBookings />} />
-                  <Route path="/shift-handover" element={<ShiftHandover />} />
               </Route>
               <Route element={<ProtectedRoute allowedRoles={['ROLE_HOTEL_ADMIN', 'ROLE_MANAGER', 'ROLE_HOUSEKEEPING', 'ROLE_RECEPTIONIST']} />}>
                   <Route path="/housekeeping" element={<Housekeeping />} />
