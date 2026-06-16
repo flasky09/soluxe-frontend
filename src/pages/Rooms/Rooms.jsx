@@ -3,12 +3,15 @@ import api from '../../services/api';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
-import { LayoutGrid, List as ListIcon, History, Search, Plus, Settings } from 'lucide-react';
+import { LayoutGrid, List as ListIcon, History, Search, Plus, Settings, CalendarDays, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../../store/authStore';
 
 const Rooms = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
+    const { hasRole } = useAuthStore();
+    const isAdminOrManager = hasRole('ADMIN') || hasRole('MANAGER');
     const [rooms, setRooms] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -264,6 +267,10 @@ const Rooms = () => {
                             <ListIcon size={18} />
                         </button>
                     </div>
+                    <button className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 font-bold text-sm bg-white hover:bg-slate-50 transition-colors flex items-center gap-2" onClick={() => navigate('/room-calendar')}>
+                        <CalendarDays size={18} />
+                        <span>{t('Calendar View')}</span>
+                    </button>
                     <button className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 font-bold text-sm bg-white hover:bg-slate-50 transition-colors" onClick={() => setShowTypeModal(true)}>
                         {t('Configure Types')}
                     </button>
@@ -294,10 +301,10 @@ const Rooms = () => {
                                 <div className="flex items-center justify-between">
                                     <span className="text-[9px] font-black uppercase tracking-[0.1em] opacity-60">FL {room.floor}</span>
                                     <button 
-                                        className="p-1 text-black/40 hover:text-black/80 transition-colors"
+                                        className="p-1 opacity-60 hover:opacity-100 transition-opacity drop-shadow-sm"
                                         onClick={(e) => { e.stopPropagation(); handleOpenModal(room); }}
                                     >
-                                        <Settings size={10} />
+                                        <Edit size={14} className="text-current" />
                                     </button>
                                 </div>
                             </div>
@@ -351,7 +358,9 @@ const Rooms = () => {
                                             <div className="table-actions">
                                                 <button className="view-btn" onClick={() => handleRoomClick(room)}>{t('View History')}</button>
                                                 <button className="view-btn" onClick={() => handleOpenModal(room)}>{t('Edit')}</button>
-                                                <button className="delete-btn" onClick={() => handleDelete(room.id)}>{t('Delete')}</button>
+                                                {isAdminOrManager && room.status === 'AVAILABLE' && (
+                                                    <button className="delete-btn" onClick={() => handleDelete(room.id)}>{t('Delete')}</button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

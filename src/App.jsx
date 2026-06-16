@@ -23,6 +23,7 @@ import ShiftGuard from './components/ShiftGuard/ShiftGuard';
 import Keycards from './pages/Keycards/Keycards';
 import Venues from './pages/Venues/Venues';
 import RoomDetails from './pages/Rooms/RoomDetails';
+import RoomCalendar from './pages/Rooms/RoomCalendar';
 import VenueBookings from './pages/VenueBookings/VenueBookings';
 import ShiftHandover from './pages/Shift/ShiftHandover';
 import Employees from './pages/Employees/Employees';
@@ -51,6 +52,7 @@ function App() {
                   <Route path="/reservations" element={<Reservations />} />
                   <Route path="/check-in" element={<CheckIn />} />
                   <Route path="/rooms" element={<Rooms />} />
+                  <Route path="/room-calendar" element={<RoomCalendar />} />
                   <Route path="/rooms/:id" element={<RoomDetails />} />
                   <Route path="/guests" element={<Guests />} />
                   <Route path="/check-out" element={<CheckOut />} />
