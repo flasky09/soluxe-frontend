@@ -141,6 +141,7 @@ const Rooms = () => {
         if (window.confirm('Are you sure you want to delete this room?')) {
             try {
                 await api.delete(`/rooms/${id}`);
+                setShowModal(false);
                 fetchData();
             } catch (err) {
                 console.error('Failed to delete room:', err);
@@ -415,6 +416,15 @@ const Rooms = () => {
                                 </div>
                             </div>
                             <div className="modal-footer">
+                                {editingRoom && isAdminOrManager && editingRoom.status === 'AVAILABLE' && (
+                                    <button 
+                                        type="button" 
+                                        onClick={() => handleDelete(editingRoom.id)} 
+                                        className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-bold transition-all mr-auto"
+                                    >
+                                        {t('Delete Room')}
+                                    </button>
+                                )}
                                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary !px-10">{t('Cancel')}</button>
                                 <button type="submit" className="btn-primary !px-10">{editingRoom ? t('Save Changes') : t('Save Room')}</button>
                             </div>
