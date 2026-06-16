@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
-import { CreditCard, Hash, User, Calendar, CheckCircle, AlertCircle, Clock, RefreshCw, UserCheck } from 'lucide-react';
+import { CreditCard, Hash, User, Calendar, CheckCircle, AlertCircle, Clock, RefreshCw, UserCheck, CalendarDays } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Keycards = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const [rooms, setRooms] = useState([]);
     const [activeStays, setActiveStays] = useState([]);
     const [guests, setGuests] = useState([]);
@@ -126,6 +128,14 @@ const Keycards = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => navigate('/room-calendar')}
+                        className="px-4 flex items-center gap-2 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition-all shadow-sm"
+                        title={t('Calendar View')}
+                    >
+                        <CalendarDays size={18} />
+                        <span className="text-sm">{t('Calendar View')}</span>
+                    </button>
                     <button 
                         onClick={fetchData}
                         className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
