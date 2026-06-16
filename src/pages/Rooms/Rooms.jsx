@@ -11,7 +11,7 @@ const Rooms = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
     const { hasRole } = useAuthStore();
-    const isAdminOrManager = hasRole('ADMIN') || hasRole('MANAGER');
+    const isAdminOrManager = hasRole('ROLE_HOTEL_ADMIN') || hasRole('ROLE_MANAGER');
     const [rooms, setRooms] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
