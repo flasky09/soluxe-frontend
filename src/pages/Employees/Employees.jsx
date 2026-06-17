@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Search, UserPlus, Mail, Phone, BadgeCheck, Building, MoreHorizontal, UserCircle, Briefcase, Users as Users2 } from 'lucide-react';
+import { Search, UserPlus, Mail, Phone, BadgeCheck, Building, MoreHorizontal, UserCircle, Briefcase, Users as Users2, Edit2, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatDate } from '../../services/formatters';
 import useAuthStore from '../../store/authStore';
+import Modal from '../../components/Modal/Modal';
+import EmployeeForm from '../../components/EmployeeForm/EmployeeForm';
 
 const Employees = () => {
     const { t } = useLanguage();
@@ -11,6 +13,8 @@ const Employees = () => {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [editingEmployee, setEditingEmployee] = useState(null);
     const isAdmin = user?.roles?.includes('ROLE_HOTEL_ADMIN');
 
     useEffect(() => {
@@ -28,11 +32,27 @@ const Employees = () => {
         }
     };
 
+    const handleOpenModal = (emp = null) => {
+        setEditingEmployee(emp);
+        setShowModal(true);
+    };
+
+    const handleDeleteEmployee = async (id) => {
+        if (!window.confirm(t('Are you sure you want to delete this employee?'))) return;
+        try {
+            await api.delete(`/employees/${id}`);
+            fetchEmployees();
+        } catch (err) {
+            console.error('Failed to delete employee:', err);
+            alert(t('Failed to delete employee.'));
+        }
+    };
+
     const filteredEmployees = employees.filter(emp => 
-        emp.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.idNumber.includes(searchQuery)
+        (emp.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (emp.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (emp.designation || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (emp.idNumber || '').includes(searchQuery)
     );
 
     return (
@@ -43,7 +63,7 @@ const Employees = () => {
                     <p className="text-slate-500 text-sm mt-1">{t('Manage and view all staff members across departments')}</p>
                 </div>
                 {isAdmin && (
-                    <button className="btn-primary flex items-center gap-2">
+                    <button className="btn-primary flex items-center gap-2" onClick={() => handleOpenModal()}>
                         <UserPlus size={18} />
                         {t('Add Employee')}
                     </button>
@@ -109,7 +129,7 @@ const Employees = () => {
                                     <th>{t('Contact Info')}</th>
                                     <th>{t('ID / Identity')}</th>
                                     <th>{t('Joined Date')}</th>
-                                    <th>{t('Status')}</th>
+                                    <th>{t('Audit')}</th>
                                     <th className="text-right pr-6">{t('Actions')}</th>
                                 </tr>
                             </thead>
@@ -120,7 +140,7 @@ const Employees = () => {
                                             <td className="pl-6">
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-10 w-10 rounded-full bg-linear-to-br from-maroon to-maroon/80 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white">
-                                                        {emp.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                        {emp.fullName?.split(' ').map(n => n[0]).join('').toUpperCase()}
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-slate-900 group-hover:text-maroon transition-colors">{emp.fullName}</span>
@@ -158,14 +178,20 @@ const Employees = () => {
                                                 {emp.dateOfJoining ? formatDate(emp.dateOfJoining) : '-'}
                                             </td>
                                             <td>
-                                                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                    {t('Active')}
-                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Created: <span className="font-bold text-slate-700">{emp.createdByName || emp.createdBy || '-'}</span></span>
+                                                    <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Modified: <span className="font-bold text-slate-700">{emp.modifiedByName || emp.modifiedBy || '-'}</span></span>
+                                                </div>
                                             </td>
                                             <td className="text-right pr-6">
-                                                <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
-                                                    <MoreHorizontal size={18} />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => handleOpenModal(emp)} className="p-2 hover:bg-blue-50 rounded-lg transition-colors text-slate-400 hover:text-blue-600" title={t('Edit')}>
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteEmployee(emp.id)} className="p-2 hover:bg-red-50 rounded-lg transition-colors text-slate-400 hover:text-red-600" title={t('Delete')}>
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -184,6 +210,22 @@ const Employees = () => {
                     </div>
                 )}
             </div>
+
+            <Modal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title={editingEmployee ? t('Edit Employee') : t('Add New Employee')}
+                size="lg"
+            >
+                <EmployeeForm 
+                    initialData={editingEmployee}
+                    onSuccess={() => {
+                        setShowModal(false);
+                        fetchEmployees();
+                    }}
+                    onCancel={() => setShowModal(false)}
+                />
+            </Modal>
         </div>
     );
 };

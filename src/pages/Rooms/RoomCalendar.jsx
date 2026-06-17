@@ -15,12 +15,20 @@ const RoomCalendar = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (selectedDate) {
+        const fetchOccupancy = async () => {
             setLoading(true);
-            api.get(`/rooms/occupancy?date=${selectedDate}`)
-                .then(res => setOccupancy(res.data))
-                .catch(err => console.error('Failed to fetch occupancy:', err))
-                .finally(() => setLoading(false));
+            try {
+                const res = await api.get(`/rooms/occupancy?date=${selectedDate}`);
+                setOccupancy(res.data);
+            } catch (err) {
+                console.error('Failed to fetch occupancy:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        if (selectedDate) {
+            fetchOccupancy();
         }
     }, [selectedDate]);
 
@@ -28,26 +36,47 @@ const RoomCalendar = () => {
         setSelectedDate(arg.dateStr);
     };
 
-    const getRoomColor = (status) => {
-        switch (status) {
-            case 'OCCUPIED': return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
-            case 'RESERVED': return 'bg-blue-500 text-white border-blue-600 shadow-blue-100';    
-            default: return 'bg-slate-300 text-slate-700 border-slate-400';
+    // Determine display status for coloring — priority: OCCUPIED > RESERVED > DIRTY/CLEANING/MAINTENANCE > AVAILABLE
+    const getDisplayStatus = (room) => {
+        if (room.status === 'OCCUPIED') return 'OCCUPIED';
+        if (room.status === 'RESERVED') return 'RESERVED';
+        // For vacant rooms, use the actual room housekeeping status
+        const rs = room.roomStatus;
+        if (rs === 'DIRTY' || rs === 'CLEANING' || rs === 'MAINTENANCE') return rs;
+        return 'AVAILABLE'; // AVAILABLE or INSPECTED → clean/vacant
+    };
+
+    const getRoomColor = (displayStatus) => {
+        switch (displayStatus) {
+            case 'OCCUPIED':    return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
+            case 'RESERVED':    return 'bg-blue-500 text-white border-blue-600 shadow-blue-100';
+            case 'DIRTY':
+            case 'CLEANING':
+            case 'MAINTENANCE': return 'bg-orange-500 text-white border-orange-600 shadow-orange-100';
+            default:            return 'bg-red-500 text-white border-red-600 shadow-red-100'; // AVAILABLE (vacant clean)
         }
     };
 
-    const getStatusLabel = (status) => {
-        if (status === 'OCCUPIED') return t('Occupied');
-        if (status === 'RESERVED') return t('Reserved');
-        return status;
+    const getStatusLabel = (displayStatus) => {
+        if (displayStatus === 'OCCUPIED')    return t('Occupied');
+        if (displayStatus === 'RESERVED')    return t('Reserved');
+        if (displayStatus === 'DIRTY')       return t('Dirty');
+        if (displayStatus === 'CLEANING')    return t('Cleaning');
+        if (displayStatus === 'MAINTENANCE') return t('Maintenance');
+        return t('Vacant');
     };
 
     const handleRoomClick = (room) => {
         navigate(`/rooms/${room.roomId}`);
     };
 
-    // Filter to only show occupied or reserved rooms
-    const activeRooms = occupancy.filter(r => r.status === 'OCCUPIED' || r.status === 'RESERVED');
+    // Stats
+    const stats = {
+        occupied:  occupancy.filter(r => r.status === 'OCCUPIED').length,
+        reserved:  occupancy.filter(r => r.status === 'RESERVED').length,
+        dirty:     occupancy.filter(r => r.status === 'VACANT' && (r.roomStatus === 'DIRTY' || r.roomStatus === 'CLEANING' || r.roomStatus === 'MAINTENANCE')).length,
+        available: occupancy.filter(r => r.status === 'VACANT' && r.roomStatus !== 'DIRTY' && r.roomStatus !== 'CLEANING' && r.roomStatus !== 'MAINTENANCE').length,
+    };
 
     return (
         <div className="flex flex-col gap-8">
@@ -58,7 +87,7 @@ const RoomCalendar = () => {
                         <CalendarDays className="text-maroon" size={32} />
                         {t('Room Calendar')}
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium italic">{t('Select a date to view in-house and arriving guests')}</p>
+                    <p className="text-slate-500 mt-1 font-medium italic">{t('Select a date to view room occupancy status')}</p>
                 </div>
             </div>
 
@@ -93,7 +122,8 @@ const RoomCalendar = () => {
                 </div>
             ) : (
                 <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex flex-col sm:flex-row bg-white p-5 justify-between items-center rounded-2xl border border-slate-200 shadow-sm">
+                    {/* Toolbar + legend */}
+                    <div className="flex flex-col sm:flex-row bg-white p-5 justify-between items-center rounded-2xl border border-slate-200 shadow-sm gap-4">
                         <div className="flex items-center gap-4">
                             <button 
                                 className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
@@ -107,62 +137,73 @@ const RoomCalendar = () => {
                             </div>
                         </div>
                         
-                        <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
+                        <div className="flex flex-wrap gap-4">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Occupied')}</span>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Occupied')} ({stats.occupied})</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Reserved')}</span>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Reserved')} ({stats.reserved})</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Dirty / Cleaning')} ({stats.dirty})</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{t('Vacant / Clean')} ({stats.available})</span>
                             </div>
                         </div>
                     </div>
 
                     {loading ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {[...Array(6)].map((_, i) => (
+                            {[...Array(12)].map((_, i) => (
                                 <div key={i} className="h-32 bg-slate-100 animate-pulse rounded-2xl border border-slate-200"></div>
                             ))}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {activeRooms.length > 0 ? activeRooms.map((room) => (
-                                <div 
-                                    key={room.roomId}
-                                    onClick={() => handleRoomClick(room)}
-                                    className={`
-                                        relative p-4 rounded-2xl border-2 transition-all cursor-pointer group hover:scale-105 active:scale-95
-                                        ${getRoomColor(room.status)}
-                                        shadow-sm hover:shadow-xl flex flex-col items-center justify-center text-center overflow-hidden
-                                    `}
-                                >
-                                    <div className="z-10 flex flex-col items-center gap-1 w-full relative">
-                                        <span className="text-3xl font-black">{room.roomNumber}</span>
-                                        <span className="text-[10px] uppercase font-bold tracking-tight opacity-75">{room.roomTypeName || '-'}</span>
-                                        <span className="text-[9px] font-black uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full bg-black/10 text-white">
-                                            {getStatusLabel(room.status)}
-                                        </span>
+                            {occupancy.length > 0 ? occupancy.map((room) => {
+                                const displayStatus = getDisplayStatus(room);
+                                return (
+                                    <div 
+                                        key={room.roomId}
+                                        onClick={() => handleRoomClick(room)}
+                                        className={`
+                                            relative p-4 rounded-2xl border-2 transition-all cursor-pointer group hover:scale-105 active:scale-95
+                                            ${getRoomColor(displayStatus)}
+                                            shadow-sm hover:shadow-xl flex flex-col items-center justify-center text-center overflow-hidden
+                                        `}
+                                    >
+                                        <div className="z-10 flex flex-col items-center gap-1 w-full relative">
+                                            <span className="text-3xl font-black">{room.roomNumber}</span>
+                                            <span className="text-[10px] uppercase font-bold tracking-tight opacity-75">{room.roomTypeName || '-'}</span>
+                                            <span className="text-[9px] font-black uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full bg-black/10 text-white">
+                                                {getStatusLabel(displayStatus)}
+                                            </span>
+                                            
+                                            {room.guestName && (
+                                                <div className="mt-2 text-[11px] font-black w-full px-2 pt-2 border-t border-white/20 text-white flex items-center justify-center">
+                                                    <span className="flex items-center justify-center gap-1 opacity-90 truncate max-w-full">
+                                                        <User size={12} className="min-w-3"/> 
+                                                        <span className="truncate">{room.guestName}</span>
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                         
-                                        {room.guestName && (
-                                            <div className="mt-2 text-[11px] font-black w-full px-2 pt-2 border-t border-white/20 text-white flex items-center justify-center">
-                                                <span className="flex items-center justify-center gap-1 opacity-90 truncate max-w-full">
-                                                    <User size={12} className="min-w-3"/> 
-                                                    <span className="truncate">{room.guestName}</span>
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
+                                            <Bed size={80} />
+                                        </div>
                                     </div>
-                                    
-                                    <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
-                                        <Bed size={80} />
-                                    </div>
-                                </div>
-                            )) : (
+                                );
+                            }) : (
                                 <div className="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 bg-white rounded-3xl border border-slate-200 border-dashed">
                                     <Bed size={48} className="opacity-20 mb-4" />
-                                    <h3 className="text-lg font-bold text-slate-600 mb-1">{t('No Occupied Rooms')}</h3>
-                                    <p className="text-sm font-medium">{t('There are no active stays or reservations scheduled for this date.')}</p>
+                                    <h3 className="text-lg font-bold text-slate-600 mb-1">{t('No Rooms Found')}</h3>
+                                    <p className="text-sm font-medium">{t('No room data available for this date.')}</p>
                                 </div>
                             )}
                         </div>

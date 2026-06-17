@@ -70,7 +70,7 @@ const Users = () => {
                 phoneNumber: '',
                 password: '',
                 role: 'RECEPTIONIST',
-                active: true
+                isActive: true
             });
         }
         setServerErrors({});
@@ -200,8 +200,8 @@ const Users = () => {
                                     {isAdmin && (
                                         <td>
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] text-text-slate font-medium">Created: <span className="font-bold text-text-dark">{u.createdBy || '-'}</span></span>
-                                                <span className="text-[10px] text-text-slate font-medium">Modified: <span className="font-bold text-text-dark">{u.modifiedBy || '-'}</span></span>
+                                                <span className="text-[10px] text-text-slate font-medium">Created: <span className="font-bold text-text-dark">{u.createdByName || u.createdBy || '-'}</span></span>
+                                                <span className="text-[10px] text-text-slate font-medium">Modified: <span className="font-bold text-text-dark">{u.modifiedByName || u.modifiedBy || '-'}</span></span>
                                             </div>
                                         </td>
                                     )}

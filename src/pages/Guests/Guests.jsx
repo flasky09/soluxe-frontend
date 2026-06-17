@@ -109,7 +109,7 @@ const Guests = () => {
                                     <th>{t('Guest')}</th>
                                     <th>{t('Contact')}</th>
                                     <th>{t('ID Info')}</th>
-                                    <th>{t('Nationality')}</th>
+                                    <th>{t('Audit')}</th>
                                     <th className="text-right">{t('Actions')}</th>
                                 </tr>
                             </thead>
@@ -152,6 +152,12 @@ const Guests = () => {
                                     </td>
                                     <td>
                                         <span className="text-text-dark font-medium">{guest.nationality || '-'}</span>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[10px] text-text-slate font-medium">Created by: <span className="font-bold text-text-dark">{guest.createdByName || guest.createdBy || '-'}</span></span>
+                                            <span className="text-[10px] text-text-slate font-medium">Modified by: <span className="font-bold text-text-dark">{guest.modifiedByName || guest.modifiedBy || '-'}</span></span>
+                                        </div>
                                     </td>
                                     <td>
                                         <div className="table-actions">

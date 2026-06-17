@@ -207,6 +207,7 @@ const VenueBookings = () => {
                                 <th>{t('Total ($)')}</th>
                                 <th>{t('Deposit')}</th>
                                 <th>{t('Status')}</th>
+                                <th>{t('Audit')}</th>
                                 <th className="text-right">{t('Actions')}</th>
                             </tr>
                         </thead>
@@ -244,6 +245,12 @@ const VenueBookings = () => {
                                     </td>
                                     <td>
                                         <span className={`status-badge ${statusColors[b.status] || ''} text-[10px] font-black uppercase tracking-wider`}>{t(b.status)}</span>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[10px] text-text-slate font-medium whitespace-nowrap">By: <span className="font-bold text-text-dark">{b.createdByName || b.createdBy || '-'}</span></span>
+                                            <span className="text-[10px] text-text-slate font-medium whitespace-nowrap">Mod: <span className="font-bold text-text-dark">{b.modifiedByName || b.modifiedBy || '-'}</span></span>
+                                        </div>
                                     </td>
                                     <td>
                                         <div className="table-actions flex-wrap gap-1">
