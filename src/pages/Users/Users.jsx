@@ -248,11 +248,11 @@ const Users = () => {
                         {serverErrors.error}
                     </div>
                 )}
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} autoComplete="off">
                     <div className="form-grid">
                         <div className="form-group">
                             <label>{t('Username')}</label>
-                            <input type="text" required minLength={3} maxLength={50} value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} placeholder="e.g. admin_soluxe" disabled={editingUser} />
+                            <input type="text" required minLength={3} maxLength={50} value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} placeholder="Username" autoComplete="off" disabled={editingUser} />
                             {serverErrors.username && <p className="text-red-500 text-xs mt-1">{serverErrors.username}</p>}
                         </div>
                         <div className="form-group">
@@ -266,21 +266,21 @@ const Users = () => {
                         </div>
                         <div className="form-group">
                             <label>{t('Full Name')}</label>
-                            <input type="text" required value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} placeholder="Jane Doe" />
+                            <input type="text" required value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} placeholder="Full name" autoComplete="off" />
                             {serverErrors.fullName && <p className="text-red-500 text-xs mt-1">{serverErrors.fullName}</p>}
                         </div>
                         <div className="form-group">
                             <label>{t('Email Address')}</label>
-                            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="jane@soluxeclubhotel.com" />
+                            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="staff@soluxeclubhotel.com" autoComplete="off" />
                             {serverErrors.email && <p className="text-red-500 text-xs mt-1">{serverErrors.email}</p>}
                         </div>
                         <div className="form-group">
                             <label>{t('Phone Number')}</label>
-                            <input type="text" value={formData.phoneNumber} onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} placeholder="+254..." />
+                            <input type="text" value={formData.phoneNumber} onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} placeholder="+254..." autoComplete="off" />
                         </div>
                         <div className="form-group">
                             <label>{editingUser ? t('New Password (Optional)') : t('Initial Password')}</label>
-                            <input type="password" required={!editingUser} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
+                            <input type="password" required={!editingUser} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Min. 8 characters" autoComplete="new-password" />
                         </div>
                         <div className="md:col-span-2">
                             <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
