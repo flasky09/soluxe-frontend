@@ -56,7 +56,7 @@ const GeneralReports = () => {
         document.body.removeChild(link);
     };
 
-    const fetchAll = async () => {
+    const fetchAll = React.useCallback(async () => {
         setLoading(true);
         try {
             const [resRes, , roomRes, staffRes, roomReportRes] = await Promise.allSettled([
@@ -75,11 +75,11 @@ const GeneralReports = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [startDate, endDate]);
 
     useEffect(() => {
         fetchAll();
-    }, [startDate, endDate]);
+    }, [fetchAll]);
 
     // Reservation status breakdown
     const statusGroups = reservations.reduce((acc, r) => {

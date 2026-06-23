@@ -13,8 +13,8 @@ const CheckIn = () => {
     const [currentPageStays, setCurrentPageStays] = useState(1);
     const [currentPageRes, setCurrentPageRes] = useState(1);
     const PAGE_SIZE = 20;
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN';
+    const { user, hasRole } = useAuthStore();
+    const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
 

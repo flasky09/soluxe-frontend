@@ -98,7 +98,7 @@ const menuGroups = [
 
 
 const Sidebar = ({ isOpen, onClose }) => {
-    const { user, logout } = useAuthStore();
+    const { user, logout, hasRole } = useAuthStore();
     const location = useLocation();
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -184,17 +184,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                     <span>{t(dashboardItem.label)}</span>
                 </NavLink>
 
-                {/* Standalone Shift Handover Link */}
-                <NavLink 
-                    to="/shift-handover" 
-                    onClick={() => window.innerWidth < 1024 && onClose()}
-                    className={({ isActive }) => 
-                        `flex items-center gap-3 px-6 py-4 no-underline text-white font-bold text-sm transition-all duration-300 border-l-4 border-transparent hover:text-yellow hover:bg-yellow/5 ${isActive ? 'text-yellow bg-yellow/10 border-l-yellow' : 'opacity-80 hover:opacity-100'}`
-                    }
-                >
-                    <ArrowRightLeft size={18} />
-                    <span>{t('Shift Handover')}</span>
-                </NavLink>
+                {/* Standalone Shift Handover Link - Only for Receptionists and Admins */}
+                {(hasRole('ROLE_RECEPTIONIST') || hasRole('ROLE_HOTEL_ADMIN')) && (
+                    <NavLink 
+                        to="/shift-handover" 
+                        onClick={() => window.innerWidth < 1024 && onClose()}
+                        className={({ isActive }) => 
+                            `flex items-center gap-3 px-6 py-4 no-underline text-white font-bold text-sm transition-all duration-300 border-l-4 border-transparent hover:text-yellow hover:bg-yellow/5 ${isActive ? 'text-yellow bg-yellow/10 border-l-yellow' : 'opacity-80 hover:opacity-100'}`
+                        }
+                    >
+                        <ArrowRightLeft size={18} />
+                        <span>{t('Shift Handover')}</span>
+                    </NavLink>
+                )}
 
                 <div className="h-px bg-white/10 mx-6 my-2" />
 

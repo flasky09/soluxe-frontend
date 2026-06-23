@@ -7,8 +7,8 @@ import Modal from '../../components/Modal/Modal';
 import { Search, Filter, Plus, FileText, CreditCard, Wallet, Trash2, Edit } from 'lucide-react';
 
 const Expenses = () => {
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN' || user?.role === 'ROLE_MANAGER';
+    const { user, hasRole } = useAuthStore();
+    const isAdmin = hasRole('ROLE_HOTEL_ADMIN') || hasRole('ROLE_MANAGER');
     const { t } = useLanguage();
 
     const [expenses, setExpenses] = useState([]);

@@ -33,8 +33,8 @@ const Login = () => {
             const { token, id, username, role } = response.data;
             
             // Store user data and token in Zustand
-            // Wrapping role in an array as authStore expects 'roles'
-            login({ id, username, roles: [role] }, token);
+            // Providing both 'role' (legacy) and 'roles' (array) for compatibility
+            login({ id, username, role, roles: [role] }, token);
             
             navigate('/dashboard');
         } catch (err) {

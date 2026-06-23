@@ -8,8 +8,8 @@ import Pagination from '../../components/Pagination/Pagination';
 import { formatDate } from '../../services/formatters';
 
 const CheckOut = () => {
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN';
+    const { user, hasRole } = useAuthStore();
+    const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const { t } = useLanguage();
     const PAGE_SIZE = 20;
     const [currentPage, setCurrentPage] = useState(1);

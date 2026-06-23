@@ -8,8 +8,8 @@ import Pagination from '../../components/Pagination/Pagination';
 import useAuthStore from '../../store/authStore';
 
 const Users = () => {
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN';
+    const { hasRole } = useAuthStore();
+    const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const [users, setUsers] = useState([]);

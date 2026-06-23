@@ -19,7 +19,6 @@ import FinancialReports from './pages/Reports/FinancialReports';
 import CheckIn from './pages/CheckIn/CheckIn';
 import CheckOut from './pages/CheckOut/CheckOut';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import ShiftGuard from './components/ShiftGuard/ShiftGuard';
 import Keycards from './pages/Keycards/Keycards';
 import Venues from './pages/Venues/Venues';
 import RoomDetails from './pages/Rooms/RoomDetails';
@@ -40,10 +39,14 @@ function App() {
         
         {/* Protected Routes - All require at least being logged in */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<ShiftGuard><MainLayout /></ShiftGuard>}>
+          <Route element={<MainLayout />}>
               {/* Main */}
               <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+              </Route>
+
+              {/* Shift Handover - Reception Only */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_HOTEL_ADMIN', 'ROLE_RECEPTIONIST']} />}>
                   <Route path="/shift-handover" element={<ShiftHandover />} />
               </Route>
 

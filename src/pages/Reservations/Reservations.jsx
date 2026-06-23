@@ -16,8 +16,8 @@ import { formatDate, formatDateTime } from '../../services/formatters';
 const Reservations = () => {
     const navigate = useNavigate();
     const { t } = useLanguage();
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN';
+    const { user, hasRole } = useAuthStore();
+    const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const [reservations, setReservations] = useState([]);
     const [guests, setGuests] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
