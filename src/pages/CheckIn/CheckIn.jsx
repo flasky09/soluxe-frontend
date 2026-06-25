@@ -8,6 +8,7 @@ import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
 import { formatDate } from '../../services/formatters';
+import { useAlert } from '../../context/AlertContext';
 
 const CheckIn = () => {
     const [currentPageStays, setCurrentPageStays] = useState(1);
@@ -16,6 +17,7 @@ const CheckIn = () => {
     const { user, hasRole } = useAuthStore();
     const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [loading, setLoading] = useState(true);
 
     // Modal states
@@ -169,11 +171,11 @@ const CheckIn = () => {
             };
             await api.post('/stays/check-in', payload);
             setShowReservationModal(false);
-            alert('Check-in successful. Stay is now active.');
+            await alert('Check-in successful. Stay is now active.', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Reservation check-in failed:', err);
-            alert(err.response?.data?.message || 'Check-in failed. Please ensure the room is available.');
+            await alert(err.response?.data?.message || 'Check-in failed. Please ensure the room is available.', 'Check-In Failed', 'error');
         } finally {
             setResCheckInLoading(false);
         }
@@ -193,7 +195,7 @@ const CheckIn = () => {
             setShowPaymentModal(true);
         } catch (err) {
             console.error('Failed to fetch folio:', err);
-            alert('Could not initialize payment.');
+            await alert('Could not initialize payment.', 'Error', 'error');
         }
     };
 
@@ -208,11 +210,11 @@ const CheckIn = () => {
             };
             await api.post(`/folios/${activeFolio.id}/payments?userId=${user?.id || 1}`, payload);
             setShowPaymentModal(false);
-            alert('Payment recorded successfully!');
+            await alert('Payment recorded successfully!', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Failed to record payment:', err);
-            alert(err.response?.data?.message || 'Error recording payment.');
+            await alert(err.response?.data?.message || 'Error recording payment.', 'Payment Error', 'error');
         }
     };
 
@@ -264,14 +266,14 @@ const CheckIn = () => {
     };
 
     const handleVoidStay = async (stayId) => {
-        if (!window.confirm('Are you sure you want to VOID this stay? The room will be set back to AVAILABLE and any linked reservation will be restored to BOOKED.')) return;
+        if (!(await confirm('Are you sure you want to VOID this stay? The room will be set back to AVAILABLE and any linked reservation will be restored to BOOKED.', 'Void Stay', 'warning'))) return;
         try {
             await api.post(`/stays/${stayId}/void?userId=${user?.id || 1}`);
-            alert('Stay voided successfully.');
+            await alert('Stay voided successfully.', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Failed to void stay:', err);
-            alert(err.response?.data?.message || 'Failed to void stay.');
+            await alert(err.response?.data?.message || 'Failed to void stay.', 'Error', 'error');
         }
     };
 

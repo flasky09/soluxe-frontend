@@ -5,11 +5,13 @@ import { useLanguage } from '../../context/LanguageContext';
 import { formatDate } from '../../services/formatters';
 import Modal from '../../components/Modal/Modal';
 import { Search, Filter, Plus, FileText, CreditCard, Wallet, Trash2, Edit } from 'lucide-react';
+import { useAlert } from '../../context/AlertContext';
 
 const Expenses = () => {
     const { user, hasRole } = useAuthStore();
     const isAdmin = hasRole('ROLE_HOTEL_ADMIN') || hasRole('ROLE_MANAGER');
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
 
     const [expenses, setExpenses] = useState([]);
     const [expenseTypes, setExpenseTypes] = useState([]);
@@ -105,18 +107,18 @@ const Expenses = () => {
             fetchData();
         } catch (err) {
             console.error('Failed to save expense', err);
-            alert('Failed to save expense. Please check your inputs.');
+            await alert('Failed to save expense. Please check your inputs.', 'Error', 'error');
         }
     };
 
     const handleDeleteExpense = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this expense? This action cannot be reversed.')) return;
+        if (!(await confirm('Are you sure you want to delete this expense? This action cannot be reversed.', 'Delete Expense', 'warning'))) return;
         try {
             await api.delete(`/expenses/${id}`);
             fetchData();
         } catch (err) {
             console.error('Failed to delete expense', err);
-            alert('Failed to delete expense.');
+            await alert('Failed to delete expense.', 'Error', 'error');
         }
     };
 
@@ -131,7 +133,7 @@ const Expenses = () => {
             setShowTypeModal(false);
         } catch (err) {
             console.error('Failed to create expense type', err);
-            alert('Failed to create expense category.');
+            await alert('Failed to create expense category.', 'Error', 'error');
         }
     };
 

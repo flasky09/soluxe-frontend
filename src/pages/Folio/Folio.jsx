@@ -6,12 +6,14 @@ import { Search, Filter, Plus, FileText, CreditCard } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatDate, formatDateTime } from '../../services/formatters';
+import { useAlert } from '../../context/AlertContext';
 
 const Folio = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const isAdmin = user?.role === 'ROLE_HOTEL_ADMIN' || user?.role === 'HOTEL_ADMIN';
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [folios, setFolios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -75,7 +77,7 @@ const Folio = () => {
         } catch (err) {
             console.error('Failed to post charge', err);
             const msg = err.response?.data?.message || 'Failed to post charge.';
-            alert(msg);
+            await alert(msg, 'Error', 'error');
         }
     };
 
@@ -107,7 +109,7 @@ const Folio = () => {
         } catch (err) {
             console.error('Failed to record payment', err);
             const msg = err.response?.data?.message || 'Failed to record payment.';
-            alert(msg);
+            await alert(msg, 'Error', 'error');
         }
     };
 
@@ -119,7 +121,7 @@ const Folio = () => {
             setShowReceiptModal(true);
         } catch (err) {
             console.error('Failed to fetch receipts', err);
-            alert('Failed to fetch receipts.');
+            await alert('Failed to fetch receipts.', 'Error', 'error');
         }
     };
 
@@ -128,14 +130,14 @@ const Folio = () => {
     };
 
     const handleCloseFolio = async (id) => {
-        if (!window.confirm('Are you sure you want to close this folio? It cannot be reopened.')) return;
+        if (!(await confirm('Are you sure you want to close this folio? It cannot be reopened.', 'Close Folio', 'warning'))) return;
         try {
             await api.post(`/folios/${id}/close?userId=${user?.id || 1}`);
             const response = await api.get('/folios');
             setFolios(response.data);
         } catch (err) {
             console.error('Failed to close folio', err);
-            alert('Failed to close folio. Ensure balance is zero.');
+            await alert('Failed to close folio. Ensure balance is zero.', 'Error', 'error');
         }
     };
 
@@ -149,7 +151,7 @@ const Folio = () => {
             setShowMethodModal(false);
         } catch (err) {
             console.error('Failed to create payment method', err);
-            alert('Failed to create payment method.');
+            await alert('Failed to create payment method.', 'Error', 'error');
         }
     };
 
@@ -164,7 +166,7 @@ const Folio = () => {
             setShowChargeTypeModal(false);
         } catch (err) {
             console.error('Failed to create charge type', err);
-            alert('Failed to create charge type.');
+            await alert('Failed to create charge type.', 'Error', 'error');
         }
     };
 

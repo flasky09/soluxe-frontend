@@ -3,6 +3,7 @@ import api from '../../services/api';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 const RoomTypes = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -10,6 +11,7 @@ const RoomTypes = () => {
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [showModal, setShowModal] = useState(false);
     const [editingType, setEditingType] = useState(null);
     const [formData, setFormData] = useState({
@@ -72,18 +74,18 @@ const RoomTypes = () => {
             fetchRoomTypes();
         } catch (err) {
             console.error('Failed to save room type:', err);
-            alert('Failed to save room type.');
+            await alert('Failed to save room type.', 'Error', 'error');
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this room type?')) {
+        if (await confirm('Are you sure you want to delete this room type?', 'Delete Room Type', 'warning')) {
             try {
                 await api.delete(`/room-types/${id}`);
                 fetchRoomTypes();
             } catch (err) {
                 console.error('Failed to delete room type:', err);
-                alert('Failed to delete room type.');
+                await alert('Failed to delete room type.', 'Error', 'error');
             }
         }
     };

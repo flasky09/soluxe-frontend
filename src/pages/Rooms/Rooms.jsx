@@ -6,10 +6,12 @@ import Pagination from '../../components/Pagination/Pagination';
 import { LayoutGrid, List as ListIcon, History, Search, Plus, Settings, CalendarDays, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
+import { useAlert } from '../../context/AlertContext';
 
 const Rooms = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
+    const { alert, confirm } = useAlert();
     const { hasRole } = useAuthStore();
     const isAdminOrManager = hasRole('ROLE_HOTEL_ADMIN') || hasRole('ROLE_MANAGER');
     const [rooms, setRooms] = useState([]);
@@ -22,6 +24,7 @@ const Rooms = () => {
         totalDeparturesToday: 0,
         cleanRooms: 0,
     });
+    
     const [showModal, setShowModal] = useState(false);
     const [showTypeModal, setShowTypeModal] = useState(false);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
@@ -94,7 +97,7 @@ const Rooms = () => {
             fetchRoomTypes();
         } catch (err) {
             console.error('Failed to create room type', err);
-            alert('Failed to create room type.');
+            await alert('Failed to create room type.', 'Error', 'error');
         }
     };
 
@@ -133,19 +136,19 @@ const Rooms = () => {
             fetchData();
         } catch (err) {
             console.error('Failed to save room:', err);
-            alert('Failed to save room.');
+            await alert('Failed to save room.', 'Error', 'error');
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this room?')) {
+        if (await confirm('Are you sure you want to delete this room?', 'Delete Room', 'warning')) {
             try {
                 await api.delete(`/rooms/${id}`);
                 setShowModal(false);
                 fetchData();
             } catch (err) {
                 console.error('Failed to delete room:', err);
-                alert('Failed to delete room.');
+                await alert('Failed to delete room.', 'Error', 'error');
             }
         }
     };

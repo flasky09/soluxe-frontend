@@ -4,11 +4,13 @@ import { Search, Plus, CreditCard } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 const PaymentMethods = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [methods, setMethods] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -69,19 +71,19 @@ const PaymentMethods = () => {
             if (err.response && (err.response.status === 400 || err.response.status === 409)) {
                 setServerErrors(err.response.data);
             } else {
-                alert('Failed to save payment method. Please try again.');
+                await alert('Failed to save payment method. Please try again.', 'Error', 'error');
             }
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this payment method?')) {
+        if (await confirm('Are you sure you want to delete this payment method?', 'Delete Payment Method', 'warning')) {
             try {
                 await api.delete(`/folios/payment-methods/${id}`);
                 fetchMethods();
             } catch (err) {
                 console.error('Failed to delete payment method:', err);
-                alert('Failed to delete payment method. It might be in use.');
+                await alert('Failed to delete payment method. It might be in use.', 'Error', 'error');
             }
         }
     };

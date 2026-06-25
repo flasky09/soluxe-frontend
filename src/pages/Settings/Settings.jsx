@@ -3,9 +3,11 @@ import api from '../../services/api';
 import { Pencil, Trash2, Plus, Info } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAlert } from '../../context/AlertContext';
 
 const Settings = () => {
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [activeTab, setActiveTab] = useState('users');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -128,13 +130,13 @@ const Settings = () => {
             fetchUsers();
         } catch (err) {
             console.error('Failed to save user:', err);
-            alert('Failed to save user details.');
+            await alert('Failed to save user details.', 'Error', 'error');
         }
     };
 
-    const handleSaveHotelInfo = (e) => {
+    const handleSaveHotelInfo = async (e) => {
         e.preventDefault();
-        alert('Hotel profile updated successfully!');
+        await alert('Hotel profile updated successfully!', 'Success', 'success');
     };
 
     // Global Definitions CRUD
@@ -162,19 +164,19 @@ const Settings = () => {
             fetchDefinitions(activeDefType);
         } catch (err) {
             console.error(`Failed to save ${activeDefType}:`, err);
-            alert(`Failed to save definition.`);
+            await alert(`Failed to save definition.`, 'Error', 'error');
         }
     };
 
     const handleDefDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this? This might affect records using it.')) return;
+        if (!(await confirm('Are you sure you want to delete this? This might affect records using it.', 'Delete Entry', 'warning'))) return;
         const type = defTypes.find(t => t.id === activeDefType);
         try {
             await api.delete(`${type.endpoint}/${id}`);
             fetchDefinitions(activeDefType);
         } catch (err) {
             console.error(`Failed to delete ${activeDefType}:`, err);
-            alert('Failed to delete. It might be in use by other records.');
+            await alert('Failed to delete. It might be in use by other records.', 'Error', 'error');
         }
     };
 

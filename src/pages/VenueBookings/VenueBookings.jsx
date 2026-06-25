@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 const EVENT_TYPES = ['CONFERENCE', 'WEDDING', 'BIRTHDAY', 'GALA', 'SEMINAR', 'WORKSHOP', 'CORPORATE', 'OTHER'];
 const SETUP_TYPES = ['THEATER', 'CLASSROOM', 'BOARDROOM', 'BANQUET', 'COCKTAIL', 'U_SHAPE', 'HOLLOW_SQUARE', 'OPEN'];
@@ -39,6 +40,7 @@ const VenueBookings = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [bookings, setBookings] = useState([]);
     const [venues, setVenues] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ const VenueBookings = () => {
             fetchAll();
         } catch (err) {
             console.error('Failed to save booking:', err);
-            alert('Failed to save venue booking.');
+            await alert('Failed to save venue booking.', 'Error', 'error');
         }
     };
 
@@ -126,12 +128,12 @@ const VenueBookings = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this booking? This cannot be undone.')) return;
+        if (!(await confirm('Delete this booking? This cannot be undone.', 'Delete Booking', 'warning'))) return;
         try {
             await api.delete(`/venue-bookings/${id}`);
             fetchAll();
         } catch {
-            alert('Failed to delete booking.');
+            await alert('Failed to delete booking.', 'Error', 'error');
         }
     };
 

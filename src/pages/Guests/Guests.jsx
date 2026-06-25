@@ -5,9 +5,11 @@ import Modal from '../../components/Modal/Modal';
 import GuestForm from '../../components/GuestForm/GuestForm';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatDate } from '../../services/formatters';
+import { useAlert } from '../../context/AlertContext';
 
 const Guests = () => {
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [guests, setGuests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -23,20 +25,20 @@ const Guests = () => {
             setEditingGuest(null);
         } catch (err) {
             console.error('Failed to fetch guests:', err);
-            alert('Failed to load guest data.');
+            await alert('Failed to load guest data.', 'Error', 'error');
         } finally {
             setLoading(false);
         }
     };
     
     const handleVoidGuest = async (id) => {
-        if (!window.confirm('Are you sure you want to VOID this guest? This will hide the guest from the list but keep the record in the database.')) return;
+        if (!(await confirm('Are you sure you want to VOID this guest? This will hide the guest from the list but keep the record in the database.', 'Void Guest', 'warning'))) return;
         try {
             await api.post(`/guests/${id}/void`);
             refreshData();
         } catch (err) {
             console.error('Failed to void guest:', err);
-            alert(err.response?.data?.message || 'Failed to void guest.');
+            await alert(err.response?.data?.message || 'Failed to void guest.', 'Error', 'error');
         }
     };
 

@@ -3,9 +3,11 @@ import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import { Plus, Globe, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
+import { useAlert } from '../../context/AlertContext';
 
 const Currencies = () => {
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [currencies, setCurrencies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -72,18 +74,18 @@ const Currencies = () => {
             fetchCurrencies();
         } catch (error) {
             console.error('Error saving currency:', error);
-            alert('Failed to save currency');
+            await alert('Failed to save currency', 'Error', 'error');
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t('Are you sure you want to delete this currency?'))) return;
+        if (!(await confirm(t('Are you sure you want to delete this currency?'), 'Delete Currency', 'warning'))) return;
         try {
             await api.delete(`/currencies/${id}`);
             fetchCurrencies();
         } catch (error) {
             console.error('Error deleting currency:', error);
-            alert('Failed to delete currency');
+            await alert('Failed to delete currency', 'Error', 'error');
         }
     };
 

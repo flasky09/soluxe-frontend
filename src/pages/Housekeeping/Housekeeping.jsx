@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { Sparkles, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAlert } from '../../context/AlertContext';
 
 const Housekeeping = () => {
     const { t } = useLanguage();
+    const { alert } = useAlert();
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -30,7 +32,7 @@ const Housekeeping = () => {
             fetchRooms();
         } catch (err) {
             console.error('Failed to update status:', err);
-            alert('Status update failed.');
+            await alert('Status update failed.', 'Error', 'error');
         }
     };
 

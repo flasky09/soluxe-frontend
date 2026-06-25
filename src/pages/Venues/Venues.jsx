@@ -3,11 +3,13 @@ import api from '../../services/api';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 const Venues = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [venues, setVenues] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -79,18 +81,18 @@ const Venues = () => {
             fetchVenues();
         } catch (err) {
             console.error('Failed to save venue:', err);
-            alert('Failed to save venue details.');
+            await alert('Failed to save venue details.', 'Error', 'error');
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this venue?')) return;
+        if (!(await confirm('Are you sure you want to delete this venue?', 'Delete Venue', 'warning'))) return;
         try {
             await api.delete(`/venues/${id}`);
             fetchVenues();
         } catch (err) {
             console.error('Failed to delete venue:', err);
-            alert('Failed to delete venue.');
+            await alert('Failed to delete venue.', 'Error', 'error');
         }
     };
 

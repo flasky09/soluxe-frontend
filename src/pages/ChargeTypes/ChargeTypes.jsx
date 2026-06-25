@@ -4,11 +4,13 @@ import { Search, Plus } from 'lucide-react';
 import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 const ChargeTypes = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const [chargeTypes, setChargeTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -69,19 +71,19 @@ const ChargeTypes = () => {
             if (err.response && (err.response.status === 400 || err.response.status === 409)) {
                 setServerErrors(err.response.data);
             } else {
-                alert('Failed to save charge type. Please try again.');
+                await alert('Failed to save charge type. Please try again.', 'Error', 'error');
             }
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this charge type?')) {
+        if (await confirm('Are you sure you want to delete this charge type?', 'Delete Charge Type', 'warning')) {
             try {
                 await api.delete(`/charge-types/${id}`);
                 fetchChargeTypes();
             } catch (err) {
                 console.error('Failed to delete charge type:', err);
-                alert('Failed to delete charge type.');
+                await alert('Failed to delete charge type.', 'Error', 'error');
             }
         }
     };

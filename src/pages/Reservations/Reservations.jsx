@@ -12,10 +12,12 @@ import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import useAuthStore from '../../store/authStore';
 import { formatDate, formatDateTime } from '../../services/formatters';
+import { useAlert } from '../../context/AlertContext';
 
 const Reservations = () => {
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const { user, hasRole } = useAuthStore();
     const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const [reservations, setReservations] = useState([]);
@@ -181,7 +183,7 @@ const Reservations = () => {
             setShowPaymentModal(true);
         } catch (err) {
             console.error('Failed to fetch folio:', err);
-            alert('Could not initialize payment.');
+            await alert('Could not initialize payment.', 'Error', 'error');
         }
     };
 
@@ -196,11 +198,11 @@ const Reservations = () => {
             };
             await api.post(`/folios/${activeFolio.id}/payments?userId=${user?.id || 1}`, payload);
             setShowPaymentModal(false);
-            alert('Payment recorded successfully!');
+            await alert('Payment recorded successfully!', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Failed to record payment:', err);
-            alert(err.response?.data?.message || 'Error recording payment.');
+            await alert(err.response?.data?.message || 'Error recording payment.', 'Payment Error', 'error');
         }
     };
 
@@ -242,12 +244,12 @@ const Reservations = () => {
             fetchAllData();
         } catch (err) {
             console.error('Failed to save booking:', err);
-            alert(err.response?.data?.message || err.response?.data?.error || 'Failed to save booking. Please check all required fields.');
+            await alert(err.response?.data?.message || err.response?.data?.error || 'Failed to save booking. Please check all required fields.', 'Error', 'error');
         }
     };
 
     const handleCancelBooking = async (id) => {
-        if (window.confirm('Cancel this booking?')) {
+        if (await confirm('Cancel this booking?', 'Cancel Reservation', 'question')) {
             try {
                 await api.post(`/reservations/${id}/cancel`);
                 fetchAllData();
@@ -258,13 +260,13 @@ const Reservations = () => {
     };
 
     const handleMarkNoShow = async (id) => {
-        if (window.confirm('Mark this guest as No-Show? The room will be released.')) {
+        if (await confirm('Mark this guest as No-Show? The room will be released.', 'Mark No-Show', 'warning')) {
             try {
                 await api.post(`/stays/reservations/${id}/no-show?userId=${user?.id || 1}`);
                 fetchAllData();
             } catch (err) {
                 console.error('Failed to mark no-show:', err);
-                alert('No-show update failed.');
+                await alert('No-show update failed.', 'Error', 'error');
             }
         }
     };

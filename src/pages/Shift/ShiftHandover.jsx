@@ -15,10 +15,12 @@ import shiftService from '../../services/shiftService';
 import useAuthStore from '../../store/authStore';
 import { format } from 'date-fns';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAlert } from '../../context/AlertContext';
 
 const ShiftHandover = () => {
     const { t } = useLanguage();
     const { user } = useAuthStore();
+    const { alert, confirm } = useAlert();
     const [currentShift, setCurrentShift] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ const ShiftHandover = () => {
     const handleClockIn = async (e) => {
         e.preventDefault();
         
-        if (!window.confirm(t('Are you sure you want to clock in now?'))) {
+        if (!(await confirm(t('Are you sure you want to clock in now?'), t('Clock In'), 'question'))) {
             return;
         }
 
@@ -67,7 +69,7 @@ const ShiftHandover = () => {
             const past = await shiftService.getShiftHistory();
             setHistory(past);
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to clock in');
+            await alert(error.response?.data?.message || 'Failed to clock in', t('Error'), 'error');
         } finally {
             setClockingIn(false);
         }
@@ -76,7 +78,7 @@ const ShiftHandover = () => {
     const handleClockOut = async (e) => {
         e.preventDefault();
 
-        if (!window.confirm(t('Are you sure you want to clock out and handover?'))) {
+        if (!(await confirm(t('Are you sure you want to clock out and handover?'), t('Clock Out'), 'warning'))) {
             return;
         }
 
@@ -89,7 +91,7 @@ const ShiftHandover = () => {
             const past = await shiftService.getShiftHistory();
             setHistory(past);
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to clock out');
+            await alert(error.response?.data?.message || 'Failed to clock out', t('Error'), 'error');
         } finally {
             setClockingOut(false);
         }

@@ -6,10 +6,12 @@ import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
 import useAuthStore from '../../store/authStore';
+import { useAlert } from '../../context/AlertContext';
 
 const Users = () => {
     const { hasRole } = useAuthStore();
     const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
+    const { alert, confirm } = useAlert();
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 20;
     const [users, setUsers] = useState([]);
@@ -93,19 +95,19 @@ const Users = () => {
             if (err.response && (err.response.status === 400 || err.response.status === 409)) {
                 setServerErrors(err.response.data);
             } else {
-                alert('An unexpected error occurred. Please try again.');
+                await alert('An unexpected error occurred. Please try again.', 'Error', 'error');
             }
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        if (await confirm('Are you sure you want to delete this user? This action cannot be undone.', 'Delete User', 'warning')) {
             try {
                 await api.delete(`/users/${id}`);
                 fetchUsers();
             } catch (err) {
                 console.error('Failed to delete user:', err);
-                alert('Failed to delete user.');
+                await alert('Failed to delete user.', 'Error', 'error');
             }
         }
     };

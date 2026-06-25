@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Camera, X, Check } from 'lucide-react';
 import api from '../../services/api';
+import { useAlert } from '../../context/AlertContext';
 
 const GuestForm = ({ initialData, onSuccess, onCancel, isSaving: externalIsSaving, isQuickMode = false }) => {
+    const { alert } = useAlert();
     const [formData, setFormData] = useState(initialData || {
         fullName: '', phone: '', email: '', nationality: '', dateOfBirth: '', gender: 'MALE', 
         idType: 'NATIONAL_ID', idNumber: '', address: '', companyName: '', 
@@ -45,7 +47,7 @@ const GuestForm = ({ initialData, onSuccess, onCancel, isSaving: externalIsSavin
             fetchDocuments();
         } catch (err) {
             console.error('Doc upload failed:', err);
-            alert('Failed to upload document.');
+            await alert('Failed to upload document.', 'Upload Error', 'error');
         } finally {
             setDocLoading(false);
         }
@@ -69,7 +71,7 @@ const GuestForm = ({ initialData, onSuccess, onCancel, isSaving: externalIsSavin
             setIsCameraOpen(true);
         } catch (err) {
             console.error('Error accessing camera:', err);
-            alert('Could not access camera. Please ensure you have given permission.');
+            await alert('Could not access camera. Please ensure you have given permission.', 'Camera Access Error', 'error');
         }
     };
 
@@ -133,7 +135,7 @@ const GuestForm = ({ initialData, onSuccess, onCancel, isSaving: externalIsSavin
             setFormData({ ...formData, imageUrl: data.secure_url });
         } catch (err) {
             console.error('Upload failed:', err);
-            alert(`Upload failed: ${err.message}`);
+            await alert(`Upload failed: ${err.message}`, 'Upload Error', 'error');
         } finally {
             setUploading(false);
         }
@@ -161,7 +163,7 @@ const GuestForm = ({ initialData, onSuccess, onCancel, isSaving: externalIsSavin
             if (err.response && (err.response.status === 400 || err.response.status === 409)) {
                 setServerErrors(err.response.data);
             } else {
-                alert('Failed to save guest profile.');
+                await alert('Failed to save guest profile.', 'Error', 'error');
             }
         } finally {
             setIsSaving(false);

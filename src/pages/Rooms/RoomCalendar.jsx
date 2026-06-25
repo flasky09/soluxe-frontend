@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
-import { CalendarDays, User, Bed, ArrowLeft } from 'lucide-react';
+import { User, Bed, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -80,16 +80,6 @@ const RoomCalendar = () => {
 
     return (
         <div className="flex flex-col gap-8">
-            {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                        <CalendarDays className="text-maroon" size={32} />
-                        {t('Room Calendar')}
-                    </h1>
-                    <p className="text-slate-500 mt-1 font-medium italic">{t('Select a date to view room occupancy status')}</p>
-                </div>
-            </div>
 
             {!selectedDate ? (
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 transform transition-all duration-300 hover:shadow-md">
@@ -158,44 +148,40 @@ const RoomCalendar = () => {
                     </div>
 
                     {loading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
                             {[...Array(12)].map((_, i) => (
-                                <div key={i} className="h-32 bg-slate-100 animate-pulse rounded-2xl border border-slate-200"></div>
+                                <div key={i} className="h-24 bg-slate-100 animate-pulse rounded-xl border border-slate-200"></div>
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
                             {occupancy.length > 0 ? occupancy.map((room) => {
                                 const displayStatus = getDisplayStatus(room);
                                 return (
                                     <div 
                                         key={room.roomId}
                                         onClick={() => handleRoomClick(room)}
-                                        className={`
-                                            relative p-4 rounded-2xl border-2 transition-all cursor-pointer group hover:scale-105 active:scale-95
-                                            ${getRoomColor(displayStatus)}
-                                            shadow-sm hover:shadow-xl flex flex-col items-center justify-center text-center overflow-hidden
-                                        `}
+                                        className={`relative p-2.5 rounded-xl border-2 transition-all cursor-pointer group hover:scale-105 active:scale-95 ${getRoomColor(displayStatus)} shadow-sm hover:shadow-xl flex flex-col items-center justify-center text-center overflow-hidden`}
                                     >
-                                        <div className="z-10 flex flex-col items-center gap-1 w-full relative">
-                                            <span className="text-3xl font-black">{room.roomNumber}</span>
-                                            <span className="text-[10px] uppercase font-bold tracking-tight opacity-75">{room.roomTypeName || '-'}</span>
-                                            <span className="text-[9px] font-black uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full bg-black/10 text-white">
+                                        <div className="z-10 flex flex-col items-center gap-0.5 w-full relative">
+                                            <span className="text-xl font-black tracking-tight">{room.roomNumber}</span>
+                                            <span className="text-[9px] uppercase font-bold tracking-tight opacity-75 truncate max-w-full">{room.roomTypeName || '-'}</span>
+                                            <span className="text-[8px] font-black uppercase tracking-wider mt-0.5 px-1.5 py-0.5 rounded-full bg-black/10 text-white">
                                                 {getStatusLabel(displayStatus)}
                                             </span>
                                             
                                             {room.guestName && (
-                                                <div className="mt-2 text-[11px] font-black w-full px-2 pt-2 border-t border-white/20 text-white flex items-center justify-center">
+                                                <div className="mt-1 text-[10px] font-black w-full px-1 pt-1.5 border-t border-white/20 text-white flex items-center justify-center">
                                                     <span className="flex items-center justify-center gap-1 opacity-90 truncate max-w-full">
-                                                        <User size={12} className="min-w-3"/> 
+                                                        <User size={10} className="min-w-2.5"/> 
                                                         <span className="truncate">{room.guestName}</span>
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
                                         
-                                        <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
-                                            <Bed size={80} />
+                                        <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:scale-125 transition-transform duration-500">
+                                            <Bed size={56} />
                                         </div>
                                     </div>
                                 );

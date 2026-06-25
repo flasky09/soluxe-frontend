@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import api from '../../services/api';
 import { User, Mail, Phone, BadgeCheck, Briefcase, Building } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAlert } from '../../context/AlertContext';
 
 const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
     const { t } = useLanguage();
+    const { alert } = useAlert();
     const [formData, setFormData] = useState(initialData || {
         fullName: '',
         phone: '',
@@ -35,7 +37,7 @@ const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
             if (err.response?.data) {
                 setServerErrors(err.response.data);
             } else {
-                alert('An error occurred while saving the employee.');
+                await alert('An error occurred while saving the employee.', 'Error', 'error');
             }
         } finally {
             setIsSaving(false);

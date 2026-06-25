@@ -6,10 +6,12 @@ import { formatDate } from '../../services/formatters';
 import useAuthStore from '../../store/authStore';
 import Modal from '../../components/Modal/Modal';
 import EmployeeForm from '../../components/EmployeeForm/EmployeeForm';
+import { useAlert } from '../../context/AlertContext';
 
 const Employees = () => {
     const { t } = useLanguage();
     const { user } = useAuthStore();
+    const { alert, confirm } = useAlert();
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -38,13 +40,13 @@ const Employees = () => {
     };
 
     const handleDeleteEmployee = async (id) => {
-        if (!window.confirm(t('Are you sure you want to delete this employee?'))) return;
+        if (!(await confirm(t('Are you sure you want to delete this employee?'), t('Delete Employee'), 'warning'))) return;
         try {
             await api.delete(`/employees/${id}`);
             fetchEmployees();
         } catch (err) {
             console.error('Failed to delete employee:', err);
-            alert(t('Failed to delete employee.'));
+            await alert(t('Failed to delete employee.'), t('Error'), 'error');
         }
     };
 
