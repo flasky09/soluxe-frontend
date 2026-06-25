@@ -6,11 +6,13 @@ import Modal from '../../components/Modal/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Pagination/Pagination';
 import { formatDate } from '../../services/formatters';
+import { useAlert } from '../../context/AlertContext';
 
 const CheckOut = () => {
     const { user, hasRole } = useAuthStore();
     const isAdmin = hasRole('ROLE_HOTEL_ADMIN');
     const { t } = useLanguage();
+    const { alert, confirm } = useAlert();
     const PAGE_SIZE = 20;
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -75,21 +77,21 @@ const CheckOut = () => {
     };
 
     const handleCheckOut = async (stay, approveAdjustment = false) => {
-        if (!approveAdjustment && !window.confirm(`Check out ${getGuestName(stay.guestId)} from Room ${getRoomNumber(stay.roomId)}?`)) return;
+        if (!approveAdjustment && !(await confirm(`Check out ${getGuestName(stay.guestId)} from Room ${getRoomNumber(stay.roomId)}?`, 'Confirm Checkout', 'question'))) return;
         try {
             await api.post(`/stays/${stay.id}/check-out?userId=${user?.id || 1}${approveAdjustment ? '&approveAdjustment=true' : ''}`);
-            alert('Check-out successful.');
+            await alert('Check-out successful.', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Check-out failed:', err);
             const msg = err.response?.data?.message || '';
             if (msg.includes('Early check-out detected')) {
-                if (window.confirm(msg + '\n\nDo you want to apply this adjustment and proceed?')) {
+                if (await confirm(msg + '\n\nDo you want to apply this adjustment and proceed?', 'Early Checkout Warning', 'warning')) {
                     handleCheckOut(stay, true);
                     return;
                 }
             } else {
-                alert(msg || 'Check-out failed.');
+                await alert(msg || 'Check-out failed.', 'Checkout Failed', 'error');
             }
         }
     };
@@ -113,11 +115,11 @@ const CheckOut = () => {
         try {
             await api.post(`/stays/${selectedStay.id}/extend?userId=${user?.id || 1}`, { newDateOut: extensionDate });
             setShowExtensionModal(false);
-            alert('Stay extended successfully.');
+            await alert('Stay extended successfully.', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Extension failed:', err);
-            alert(err.response?.data?.message || 'Failed to extend stay.');
+            await alert(err.response?.data?.message || 'Failed to extend stay.', 'Extension Failed', 'error');
         } finally {
             setExtensionLoading(false);
         }
@@ -146,11 +148,11 @@ const CheckOut = () => {
             };
             await api.post(`/folios/${folio.id}/charges?userId=${user?.id || 1}`, payload);
             setShowPostChargeModal(false);
-            alert('Charge posted successfully.');
+            await alert('Charge posted successfully.', 'Success', 'success');
             fetchAllData();
         } catch (err) {
             console.error('Failed to post charge:', err);
-            alert(err.response?.data?.message || 'Failed to post charge.');
+            await alert(err.response?.data?.message || 'Failed to post charge.', 'Error', 'error');
         }
     };
 

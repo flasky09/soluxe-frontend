@@ -9,6 +9,7 @@ import { Calendar, Info, ArrowLeft, User, Clock, FileText, ReceiptText, LogOut, 
 import Modal from '../../components/Modal/Modal';
 import useAuthStore from '../../store/authStore';
 import Pagination from '../../components/Pagination/Pagination';
+import { useAlert } from '../../context/AlertContext';
 
 
 const fmt = (dt) => {
@@ -41,6 +42,7 @@ const RoomDetails = () => {
     const [extensionDate, setExtensionDate] = useState('');
     const [extensionLoading, setExtensionLoading] = useState(false);
     const { user } = useAuthStore();
+    const { alert, confirm } = useAlert();
     const [currentPage, setCurrentPage] = useState(1);
     const [activeTab, setActiveTab] = useState('LEDGER'); // New tab state
     const [roomRevenue, setRoomRevenue] = useState(0);
@@ -132,24 +134,24 @@ const RoomDetails = () => {
     const handleCheckout = async (approveAdjustment = false) => {
         const activeStay = stays.find(s => s.status === 'CHECKED_IN' || s.status === 'ACTIVE');
         if (!activeStay) {
-            alert(t('No active stay found for this room.'));
+            await alert(t('No active stay found for this room.'), 'Error', 'error');
             return;
         }
-        if (!approveAdjustment && !confirm(t('Are you sure you want to checkout this room?'))) return;
+        if (!approveAdjustment && !(await confirm(t('Are you sure you want to checkout this room?'), 'Confirm Checkout', 'question'))) return;
         try {
             await api.post(`/stays/${activeStay.id}/check-out?userId=${user?.id || 1}${approveAdjustment ? '&approveAdjustment=true' : ''}`);
-            alert(t('Checkout successful!'));
+            await alert(t('Checkout successful!'), 'Success', 'success');
             fetchData();
         } catch (err) {
             console.error('Checkout failed:', err);
             const msg = err.response?.data?.message || '';
             if (msg.includes('Early check-out detected')) {
-                if (confirm(msg + '\n\n' + t('Do you want to apply this adjustment and proceed?'))) {
+                if (await confirm(msg + '\n\n' + t('Do you want to apply this adjustment and proceed?'), 'Early Checkout Warning', 'warning')) {
                     handleCheckout(true);
                     return;
                 }
             } else {
-                alert(t('Checkout failed: ') + (msg || err.message));
+                await alert(t('Checkout failed: ') + (msg || err.message), 'Checkout Failed', 'error');
             }
         }
     };
@@ -165,10 +167,11 @@ const RoomDetails = () => {
                 }
             });
             setShowExtensionModal(false);
+            await alert(t('Stay extended successfully.'), 'Success', 'success');
             fetchData();
         } catch (err) {
             console.error('Failed to extend stay:', err);
-            alert(err.response?.data?.message || 'Extension failed.');
+            await alert(err.response?.data?.message || 'Extension failed.', 'Extension Failed', 'error');
         } finally {
             setExtensionLoading(false);
         }
