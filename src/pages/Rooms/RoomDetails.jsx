@@ -129,16 +129,28 @@ const RoomDetails = () => {
         }
     }, [id]);
 
-    const handleCheckout = async () => {
-        if (!confirm(t('Are you sure you want to checkout this room?'))) return;
+    const handleCheckout = async (approveAdjustment = false) => {
+        const activeStay = stays.find(s => s.status === 'CHECKED_IN' || s.status === 'ACTIVE');
+        if (!activeStay) {
+            alert(t('No active stay found for this room.'));
+            return;
+        }
+        if (!approveAdjustment && !confirm(t('Are you sure you want to checkout this room?'))) return;
         try {
-            await api.post(`/stays/${id}/check-out?userId=${user?.id || 1}`, null, {
-                params: { approveAdjustment: true }
-            });
+            await api.post(`/stays/${activeStay.id}/check-out?userId=${user?.id || 1}${approveAdjustment ? '&approveAdjustment=true' : ''}`);
+            alert(t('Checkout successful!'));
             fetchData();
         } catch (err) {
             console.error('Checkout failed:', err);
-            alert(t('Checkout failed: ') + (err.response?.data?.message || err.message));
+            const msg = err.response?.data?.message || '';
+            if (msg.includes('Early check-out detected')) {
+                if (confirm(msg + '\n\n' + t('Do you want to apply this adjustment and proceed?'))) {
+                    handleCheckout(true);
+                    return;
+                }
+            } else {
+                alert(t('Checkout failed: ') + (msg || err.message));
+            }
         }
     };
 
